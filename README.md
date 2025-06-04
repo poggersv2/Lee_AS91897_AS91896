@@ -34,8 +34,3 @@ Lee_AS91897_AS91896/
 └── README.md                            # Project documentation
 ```
 
-## Usage
-Run the main Python file to start the application:
-```cmd
-python main.py
-```
