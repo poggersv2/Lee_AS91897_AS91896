@@ -14,7 +14,10 @@ ctk.set_appearance_mode("Dark")
 ctk.FontManager.load_font(FONT_PATH)
 
 win.grid_columnconfigure(0, weight=0)
-win.grid_columnconfigure(1, weight=1)
+win.grid_columnconfigure(1, weight=0)
+
+win.grid_rowconfigure(2, weight=0)
+win.grid_columnconfigure(2, weight=10)
 
 title_font = ("Outfit Medium", 24)
 body_font = ("Outfit Medium", 18)
@@ -36,9 +39,20 @@ name_entry.grid(row=1, column=1, padx=20, pady=10, sticky="w")
 
 #last name label
 last_name_label = ctk.CTkLabel(win, text="Last Name:", font=body_font)
-last_name_label.grid(row=2, column=0, padx=40, pady=10, sticky="w")
+last_name_label.grid(row=1, column=2, padx=40, pady=10, sticky="w")
 last_name_entry = ctk.CTkEntry(win, width=200, font=body_font)
-last_name_entry.grid(row=2, column=1, padx=20, pady=10, sticky="w")
+last_name_entry.grid(row=1, column=3, padx=20, pady=10, sticky="w")
+
+value = [[1,2,3,4,5],
+         [1,2,3,4,5],
+         [1,2,3,4,5],
+         [1,2,3,4,5],
+         [1,2,3,4,5]]
+
+
+table = CTkTable(master=win, row=2, column=2, values=value)
+table.grid(padx=20, pady=20, sticky="nsew")
+
 
 #submit button
 def submit():
