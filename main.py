@@ -3,21 +3,27 @@ import tkinter.messagebox as mbox
 from CTkTable import CTkTable
 from PIL import Image
 import sys
+import os
+
+
+#BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+#LOGO_PATH = os.path.join(BASE_DIR, "Resources", "Images", "logo.png")
+#FONT_PATH = os.path.join(BASE_DIR, "Resources", "Fonts", "Outfit-Medium.ttf")
 
 
 
-LOGO_PATH = r"Resources\Images\logo.png"
-FONT_PATH = r"Resources\Fonts\Outfit-Medium.ttf"
+#LOGO_PATH = r"Resources\Images\logo.png"
+#FONT_PATH = r"Resources\Fonts\Outfit-Medium.ttf"
 ENTRY_CORNER_RADIUS = 10
 ENTRY_COLOR = "#FFFFFF"  # White color for the entry fields
 
 win=ctk.CTk()
 win.state("zoomed") 
-#win.geometry(f"{win.winfo_screenwidth()}x{win.winfo_screenheight()}+0+0")
 #win.geometry("1200x800")
 win.title("Julie's Party Hire")
 ctk.set_appearance_mode("Dark")
-ctk.FontManager.load_font(FONT_PATH)
+#ctk.FontManager.load_font(FONT_PATH)
 
 win.grid_columnconfigure(0, weight=1)
 win.grid_columnconfigure(1, weight=0)
@@ -32,9 +38,9 @@ title_font = ("Outfit Medium", 24)
 body_font = ("Outfit Medium", 18)
 
 #logo image
-logo_image = ctk.CTkImage(light_image=Image.open(LOGO_PATH), dark_image=Image.open(LOGO_PATH), size=(40, 40))
-logo_label = ctk.CTkLabel(win, text="", image=logo_image)
-logo_label.grid(row=0, column=0, padx=(0, 10), pady=20, sticky="e")
+#logo_image = ctk.CTkImage(light_image=Image.open(LOGO_PATH), dark_image=Image.open(LOGO_PATH), size=(40, 40))
+#logo_label = ctk.CTkLabel(win, text="", image=logo_image)
+#logo_label.grid(row=0, column=0, padx=(0, 10), pady=20, sticky="e")
 
 #title label
 title_label = ctk.CTkLabel(win, text="Julie's Party Hire", font=title_font)
@@ -65,14 +71,91 @@ table.grid(padx=20, pady=20, sticky="nsew")
 
 """
 order_frame = ctk.CTkFrame(win, corner_radius=20)
-order_frame.grid(row=6, column=0, columnspan=4, padx=40, pady=20, sticky="nsew")
+order_frame.grid(row=6, column=0, columnspan=10, padx=40, pady=20, sticky="nsew")
 
+items_frame = ctk.CTkFrame(win, corner_radius=15)
+items_frame.grid(row=2, column=0, columnspan=10, padx=40, pady=10, sticky="nsew")
+
+headers = ["", "Items", "Quantity", "Price", "Total"]
+items = ["Balloons", "Party Hats", "Streamers", "Confetti", "Glitter"]
+item_prices = [5.0, 7.0, 3.0, 1.0, 2.0]
+quantity_vars = []
+checkbox_vars = []
+total_labels = []
 
 #submit button
+
+for i in headers:
+    ctk.CTkLabel(items_frame, text=i, font=body_font).grid(row=0, column=headers.index(i), padx=10, pady=5)
+
+for position, i in enumerate(items):
+    checkbox_var = ctk.BooleanVar()
+    checkbox_vars.append(checkbox_var)
+    checkbox = ctk.CTkCheckBox(items_frame, text="", variable=checkbox_var, font=body_font)
+    checkbox.grid(row=position + 1, column=0, padx=10, pady=5, sticky="w")
+    item_label = ctk.CTkLabel(items_frame, text=i, font=body_font)
+    item_label.grid(row=position + 1, column=1, padx=10, pady=5, sticky="w")
+    
+
+    quantity_var = ctk.StringVar(value="")
+    quantity_vars.append(quantity_var)
+    quantity_var.trace_add("write", lambda *args: check_totals()) 
+    
+    quantity_input = ctk.CTkEntry(
+        items_frame, width=50, font=body_font, corner_radius=ENTRY_CORNER_RADIUS,
+        fg_color=ENTRY_COLOR, text_color="black", border_color=ENTRY_COLOR,
+        textvariable=quantity_var
+    )
+    quantity_input.grid(row=position+ 1, column=2, padx=10, pady=5, sticky="w")
+    
+    price_label = ctk.CTkLabel(items_frame, text=f"${item_prices[position]:.2f}", font=body_font)
+    price_label.grid(row=position + 1, column=3, padx=10, pady=5, sticky="w")
+    
+    total_label = ctk.CTkLabel(items_frame, text="$0.00", font=body_font)
+    total_label.grid(row=position + 1, column=4, padx=10, pady=5, sticky="w")
+    total_labels.append(total_label)
+
 def submit():
     first_name = name_entry.get()
     last_name = last_name_entry.get()
     if not first_name or not last_name:
+        error_message("name")
+    
+
+def error_message(reason, *args):
+    if reason == "type":
+        mbox.showerror("Input Error", f"Please enter a valid quantity for {args[0]}.")
+    elif reason == "negative":
+        mbox.showerror("Input Error", f"Quantity for {args[0]} cannot be negative.")
+    elif reason == "too big":
+        mbox.showerror("Input Error", f"Quantity for {args[0]} is too large (max 500).")
+    elif reason == "name":
         mbox.showerror("Input Error", "Please enter both first and last names.")
 
-win.mainloop()
+def check_totals():
+    for i, item in enumerate(items):
+        try:
+            if not quantity_vars[i].get():
+                total_labels[i].configure(text="$0.00")
+                continue
+            quantity = int(quantity_vars[i].get())
+            if quantity < 0:
+                error_message("negative", item)
+                quantity_vars[i].set("")
+                total_labels[i].configure(text="$0.00")
+                continue
+            if quantity > 500:
+                error_message("too big", item)
+                quantity_vars[i].set("")
+                total_labels[i].configure(text="$0.00")
+                continue
+            total = item_prices[i] * quantity
+            total_labels[i].configure(text=f"${total:.2f}")
+        except ValueError:
+            total_labels[i].configure(text="$0.00")
+            error_message("type", item)
+
+if __name__ == "__main__":
+    win.mainloop()
+
+

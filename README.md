@@ -8,10 +8,27 @@ pip install customtkinter
 ```
 
 ## Usage
-Run the main Python file to start the application:
-```cmd
-python main.py
-```
+1. **Download or Clone the Repository**
+
+   - **Clone with Git (recommended):**
+     ```cmd
+     git clone https://github.com/your-username/Lee_AS91897_AS91896.git
+     ```
+   - **Or download as ZIP:**  
+     Click the green "Code" button on GitHub, select "Download ZIP", and extract it to your computer.
+
+2. **Navigate to the Project Directory**
+
+   Open a terminal and change to the directory where you downloaded or cloned the repo:
+   ```cmd
+   cd path\to\Lee_AS91897_AS91896
+   ```
+
+3. **Run the Main Python File**
+
+   ```cmd
+   python main.py
+   ```
 
 ## File Structure
 ```
