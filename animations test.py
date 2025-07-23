@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 <<<<<<< Updated upstream
+=======
+>>>>>>> origin/main
 import customtkinter as ctk
 
 class App(ctk.CTk):
@@ -26,6 +29,7 @@ class App(ctk.CTk):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
+<<<<<<< HEAD
 =======
 import customtkinter as ctk
 
@@ -55,3 +59,5 @@ if __name__ == "__main__":
     app = App()
     app.mainloop()
 >>>>>>> Stashed changes
+=======
+>>>>>>> origin/main
