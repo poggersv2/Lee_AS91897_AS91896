@@ -79,6 +79,7 @@ class App(ctk.CTk):
         self.receipt_frame = ctk.CTkFrame(self, corner_radius=20)
         self.receipt_frame.grid(row=8, column=0, columnspan=10, padx=40, pady=10, sticky="nsew")
 
+        self.display_receipts()
         
 
     def display_items(self):
@@ -159,7 +160,54 @@ class App(ctk.CTk):
             item_total_label.grid(row=self.row_pos, column=self.column_pos, padx=50)
             self.total_labels.append(item_total_label)
             
-   
+    def display_receipts(self):
+        # Clear previous widgets in receipt_frame
+        for widget in self.receipt_frame.winfo_children():
+            widget.destroy()
+
+        receipts = os.path.join(self.BASE_DIR, "receipts.json")
+        try:
+            with open(receipts, "r") as f:
+                all_receipts = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            all_receipts = []
+
+        receipts_header = ["","Reciept No", "Name", "Items", "Total Price"]
+
+        # Headers
+        #for i in receipts_header:
+         #   self.header = ctk.CTkLabel(self.item_frame, text=i,font=self.body_font)
+          #  self.header.grid(row=0, column=self.headers.index(i)+1, padx=50, pady=5)
+
+        row = 1
+        for receipt in all_receipts:
+            # Receipt Info
+            info_label = ctk.CTkLabel(
+                self.receipt_frame,
+                text=f"{receipt['receipt_no']}",
+                font=self.body_font
+            )
+            info_label.grid(row=row, column=0, sticky="w")
+
+            name_label = ctk.CTkLabel(
+                self.receipt_frame,
+                text=f"{receipt['first_name']} {receipt['last_name']}",
+                font=self.body_font
+            )
+            name_label.grid(row=row, column=1, sticky="w")
+
+            # Items (combine names and quantities for display)
+            items_str = ", ".join([f"{item['name']} x{item['quantity']}" for item in receipt["items"]])
+            items_label = ctk.CTkLabel(self.receipt_frame, text=items_str, font=self.body_font)
+            items_label.grid(row=row, column=2, sticky="w")
+
+            price_label = ctk.CTkLabel(self.receipt_frame, text=f"${receipt['total']:.2f}", font=self.body_font)
+            price_label.grid(row=row, column=3, sticky="w")
+
+            total_label = ctk.CTkLabel(self.receipt_frame, text=f"${receipt['total']:.2f}", font=self.body_font)
+            total_label.grid(row=row, column=4, sticky="w")
+
+            row += 1
         
     def calculate_total(self):
         global total
