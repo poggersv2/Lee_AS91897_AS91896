@@ -44,17 +44,20 @@ class App(ctk.CTk):
         self.logo_label = ctk.CTkLabel(self,text="", image = self.logo_image)
         self.logo_label.grid(row=0, column=0, padx=(10, 10), pady=20, sticky="EW")
 
-
+        # Title labels
         self.title_label = ctk.CTkLabel(self, text = "Juile's Party Hire", font = self.title_font)
         self.title_label.grid(row=0, column=1, columnspan=3, padx=(0, 0), pady=20, sticky="w")
 
+        # Name Label
         self.name_label = ctk.CTkLabel(self, text = "First Name:", font=self.body_font)
         self.name_label.grid(row=1, column=1, padx=(0, 10), pady=10, sticky="e")
 
         # Name entry setup
+        # Link string to entry
         self.first_name_var = tk.StringVar()
         self.first_name_entry = ctk.CTkEntry(self, width=200, font=self.body_font, corner_radius=self.CORNER_RADIUS, textvariable=self.first_name_var)
         self.first_name_entry.grid(row=1, column=2, padx=(0, 10), pady=10, sticky="w")
+        # add tracer
         self.first_name_var.trace_add(
             "write",
             lambda *args, name=self.first_name_var, first_last = "first": self.check_name(name, first_last)
@@ -67,32 +70,38 @@ class App(ctk.CTk):
         self.last_name_var = tk.StringVar()
         self.last_name_entry = ctk.CTkEntry(self, width=200, font=self.body_font, corner_radius=self.CORNER_RADIUS, textvariable=self.last_name_var)
         self.last_name_entry.grid(row=1, column=4, padx=(0, 40), pady=10, sticky="w")
+        # add tracer
         self.last_name_var.trace_add(
             "write",
             lambda *args, name=self.last_name_var, first_last = "last": self.check_name(name, first_last)
         )
 
+        # Display items
         self.display_items()
         
+        # Add sumbit button
         self.submit_button = ctk.CTkButton(
             self, text="Submit", width=100, height=35, corner_radius=10,
             font=self.body_font, command=self.submit
         )
         self.submit_button.grid(row=7, column=1)
 
+        # Add frame for receipts
         self.receipt_frame = ctk.CTkFrame(self, corner_radius=20)
         self.receipt_frame.grid(row=8, column=0, columnspan=8, padx=60, pady=10, sticky="ew")
 
+        # Displays receipts
         self.display_receipts()
         
 
     def display_items(self):
         self.item_frame = ctk.CTkFrame(self, corner_radius=20)
         self.item_frame.grid(row=6, column=0, columnspan=8, padx=60, pady=(30,10), sticky="ew")
-        # Configure item_frame columns for even spacing
+        # Configures item_frame columns for even spacing
         for col in range(5):
             self.item_frame.columnconfigure(col, weight=1)
 
+        # Headers for items
         self.headers = ["Items", "Quantity", "Price", "Total"]
         self.items = ["Balloons", "Party Hats", "Streamers", "Confetti", "Glitter"]
         self.price = [9,3,2,1,6]
@@ -126,7 +135,7 @@ class App(ctk.CTk):
                 text="",
                 font=self.body_font,
                 command=lambda pos=position: self.on_check(pos),
-                variable=self.checkbox_var  # <-- Link the BooleanVar to the checkbox!
+                variable=self.checkbox_var  # <-- Links the BoolVar to the checkbox
             )
 
             self.checkbox.grid(row=self.row_pos, column=self.column_pos, padx=40, pady=(0,15))
@@ -239,6 +248,7 @@ class App(ctk.CTk):
 
 
     def delete_selected_receipts(self):
+        # File directory
         receipts_file = os.path.join(self.BASE_DIR, "receipts.json")
         try:
             with open(receipts_file, "r") as f:
