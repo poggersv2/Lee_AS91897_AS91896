@@ -7,6 +7,7 @@ import sys
 import json
 import random
 
+
 class App(ctk.CTk):
     # Initialize class
     def __init__(self):
@@ -29,8 +30,11 @@ class App(ctk.CTk):
 
         # Configure main window
         self.title("Julie's Party Hire")
+        # Make the window use dark mode
         ctk.set_appearance_mode("dark")
+        # Make the window slightly transparent
         self.attributes("-alpha", 0.9)
+        # Configure main window columns for layout
 
         # Load font
         ctk.FontManager.load_font(self.FONT_PATH)
@@ -49,11 +53,11 @@ class App(ctk.CTk):
 
         # Name entry setup
         self.first_name_var = tk.StringVar()
-        self.name_entry = ctk.CTkEntry(self, width=200, font=self.body_font, corner_radius=self.CORNER_RADIUS, textvariable=self.first_name_var)
-        self.name_entry.grid(row=1, column=2, padx=(0, 10), pady=10, sticky="w")
+        self.first_name_entry = ctk.CTkEntry(self, width=200, font=self.body_font, corner_radius=self.CORNER_RADIUS, textvariable=self.first_name_var)
+        self.first_name_entry.grid(row=1, column=2, padx=(0, 10), pady=10, sticky="w")
         self.first_name_var.trace_add(
             "write",
-            lambda *args, name=self.first_name_var: self.check_name(name)
+            lambda *args, name=self.first_name_var, first_last = "first": self.check_name(name, first_last)
         )
 
         self.last_name_label = ctk.CTkLabel(self, text="Last Name:", font=self.body_font)
@@ -65,7 +69,7 @@ class App(ctk.CTk):
         self.last_name_entry.grid(row=1, column=4, padx=(0, 40), pady=10, sticky="w")
         self.last_name_var.trace_add(
             "write",
-            lambda *args, name=self.last_name_var: self.check_name(name)
+            lambda *args, name=self.last_name_var, first_last = "last": self.check_name(name, first_last)
         )
 
         self.display_items()
@@ -75,16 +79,19 @@ class App(ctk.CTk):
             font=self.body_font, command=self.submit
         )
         self.submit_button.grid(row=7, column=1)
-        
+
         self.receipt_frame = ctk.CTkFrame(self, corner_radius=20)
-        self.receipt_frame.grid(row=8, column=0, columnspan=10, padx=40, pady=10, sticky="nsew")
+        self.receipt_frame.grid(row=8, column=0, columnspan=8, padx=60, pady=10, sticky="ew")
 
         self.display_receipts()
         
 
     def display_items(self):
         self.item_frame = ctk.CTkFrame(self, corner_radius=20)
-        self.item_frame.grid(row=6, column=0, columnspan=10, padx=40, pady=(30,10), sticky="nsew")
+        self.item_frame.grid(row=6, column=0, columnspan=8, padx=60, pady=(30,10), sticky="ew")
+        # Configure item_frame columns for even spacing
+        for col in range(5):
+            self.item_frame.columnconfigure(col, weight=1)
 
         self.headers = ["Items", "Quantity", "Price", "Total"]
         self.items = ["Balloons", "Party Hats", "Streamers", "Confetti", "Glitter"]
@@ -98,7 +105,7 @@ class App(ctk.CTk):
         for i in self.headers:
             # Iterate through table headers list and places them
             self.header = ctk.CTkLabel(self.item_frame, text=i,font=self.body_font)
-            self.header.grid(row=0, column=self.headers.index(i)+1, padx=50, pady=5)
+            self.header.grid(row=0, column=self.headers.index(i)+1, padx=70, pady=10)
 
         for position, item in enumerate(self.items):
             # Set initial position to the top (1, as headers take up row 0)
@@ -113,7 +120,7 @@ class App(ctk.CTk):
             self.checkbox_vars.append(self.checkbox_var)
             print("checkbox tracevar added")
             self.checkbox_var.trace_add("write", lambda *args: self.on_check)
-            
+
             self.checkbox = ctk.CTkCheckBox(
                 self.item_frame,
                 text="",
@@ -121,9 +128,8 @@ class App(ctk.CTk):
                 command=lambda pos=position: self.on_check(pos),
                 variable=self.checkbox_var  # <-- Link the BooleanVar to the checkbox!
             )
-            
 
-            self.checkbox.grid(row=self.row_pos, column=self.column_pos, padx=30, pady=(0,10))
+            self.checkbox.grid(row=self.row_pos, column=self.column_pos, padx=40, pady=(0,15))
             self.column_pos += 1
 
             ####################
@@ -131,7 +137,7 @@ class App(ctk.CTk):
             ####################
 
             item_label = ctk.CTkLabel(self.item_frame, text=f"{item}",font=self.body_font)
-            item_label.grid(row=self.row_pos,  column=self.column_pos)
+            item_label.grid(row=self.row_pos,  column=self.column_pos, padx=40, pady=(0,15))
             self.column_pos += 1
 
             ########################
@@ -141,74 +147,113 @@ class App(ctk.CTk):
             self.quantity_vars.append(self.quantity_var)
             self.quantity_var.trace_add("write", lambda *args: self.check_totals()) 
 
-            
             quantity = ctk.CTkEntry(self.item_frame, width=70, font=self.body_font, corner_radius=self.CORNER_RADIUS, textvariable=self.quantity_var)
-            quantity.grid(row=self.row_pos, column=self.column_pos, padx=50)
+            quantity.grid(row=self.row_pos, column=self.column_pos, padx=60, pady=(0,15))
             self.column_pos += 1
 
             ##########################
             # ITEM PRICE LABEL SETUP #
             ##########################
             item_price = ctk.CTkLabel(self.item_frame, text=f"${self.price[position]}",font=self.body_font)
-            item_price.grid(row=self.row_pos, column=self.column_pos, padx=50)
+            item_price.grid(row=self.row_pos, column=self.column_pos, padx=60, pady=(0,15))
             self.column_pos += 1
 
             ##########################
             # ITEM TOTAL LABEL SETUP #
             ##########################
             item_total_label = ctk.CTkLabel(self.item_frame, text="$0.00",font=self.body_font)
-            item_total_label.grid(row=self.row_pos, column=self.column_pos, padx=50)
+            item_total_label.grid(row=self.row_pos, column=self.column_pos, padx=60, pady=(0,15))
             self.total_labels.append(item_total_label)
             
+            
     def display_receipts(self):
+        self.receipt_checkbox_vars = []
+
         # Clear previous widgets in receipt_frame
         for widget in self.receipt_frame.winfo_children():
             widget.destroy()
 
-        receipts = os.path.join(self.BASE_DIR, "receipts.json")
+        receipts_file = os.path.join(self.BASE_DIR, "receipts.json")
         try:
-            with open(receipts, "r") as f:
+            with open(receipts_file, "r") as f:
                 all_receipts = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             all_receipts = []
 
-        receipts_header = ["","Reciept No", "Name", "Items", "Total Price"]
+        # Set grid for receipt_frame to match item_frame
+        self.receipt_frame.grid(row=8, column=0, columnspan=8, padx=60, pady=10, sticky="ew")
 
-        # Headers
-        #for i in receipts_header:
-         #   self.header = ctk.CTkLabel(self.item_frame, text=i,font=self.body_font)
-          #  self.header.grid(row=0, column=self.headers.index(i)+1, padx=50, pady=5)
+        # Headers for the receipts frame
+        headers = ["", "Receipt No", "Name", "Item", "Unit Price", "Quantity", "Item Total", "Receipt Total"]
+        for col, header in enumerate(headers):
+            header_label = ctk.CTkLabel(self.receipt_frame, text=header, font=self.body_font)
+            header_label.grid(row=0, column=col, padx=30, pady=5)
 
-        row = 1
-        for receipt in all_receipts:
-            # Receipt Info
-            info_label = ctk.CTkLabel(
-                self.receipt_frame,
-                text=f"{receipt['receipt_no']}",
-                font=self.body_font
-            )
-            info_label.grid(row=row, column=0, sticky="w")
+        row_pos = 1
+        for receipt_number, receipt in enumerate(all_receipts):
+            print(receipt_number, receipt)
+            cb_var = ctk.BooleanVar()
+            self.receipt_checkbox_vars.append(cb_var)
+            for number, item in enumerate(receipt["items"]):
+                print(number, item)
+                # Only show receipt info and checkbox on the first row for each receipt
+                if number == 0: 
+                    cb = ctk.CTkCheckBox(self.receipt_frame, text="", variable=cb_var)
+                    cb.grid(row=row_pos, column=0, padx=40, pady=(0,15))
+                    receipt_label = ctk.CTkLabel(self.receipt_frame, text=f"{receipt['receipt_no']}", font=self.body_font)
+                    receipt_label.grid(row=row_pos, column=1, padx=10)
+                    name_label = ctk.CTkLabel(self.receipt_frame, text=f"{receipt['first_name']} {receipt['last_name']}", font=self.body_font)
+                    name_label.grid(row=row_pos, column=2, padx=10)
+                else:
+                    # Empty labels for grouping effect
+                    ctk.CTkLabel(self.receipt_frame, text="", font=self.body_font).grid(row=row_pos, column=0, padx=10)
+                    ctk.CTkLabel(self.receipt_frame, text="", font=self.body_font).grid(row=row_pos, column=1, padx=10)
+                    ctk.CTkLabel(self.receipt_frame, text="", font=self.body_font).grid(row=row_pos, column=2, padx=10)
 
-            name_label = ctk.CTkLabel(
-                self.receipt_frame,
-                text=f"{receipt['first_name']} {receipt['last_name']}",
-                font=self.body_font
-            )
-            name_label.grid(row=row, column=1, sticky="w")
+                # Item Name
+                item_label = ctk.CTkLabel(self.receipt_frame, text=f"{item['name']}", font=self.body_font)
+                item_label.grid(row=row_pos, column=3, padx=10)
+                # Unit Price
+                price_label = ctk.CTkLabel(self.receipt_frame, text=f"${item['unit_price']}", font=self.body_font)
+                price_label.grid(row=row_pos, column=4, padx=10)
+                # Quantity
+                qty_label = ctk.CTkLabel(self.receipt_frame, text=f"{item['quantity']}", font=self.body_font)
+                qty_label.grid(row=row_pos, column=5, padx=10)
+                # Item Total
+                total_label = ctk.CTkLabel(self.receipt_frame, text=f"${item['total']:.2f}", font=self.body_font)
+                total_label.grid(row=row_pos, column=6, padx=10)
+                # Receipt Total (only once per receipt, so show only for first item)
+                if number == 0:
+                    receipt_total_label = ctk.CTkLabel(self.receipt_frame, text=f"${receipt['total']:.2f}", font=self.body_font)
+                    receipt_total_label.grid(row=row_pos, column=7, padx=10)
+                else:
+                    receipt_total_label = ctk.CTkLabel(self.receipt_frame, text="", font=self.body_font)
+                    receipt_total_label.grid(row=row_pos, column=7, padx=10)
+                row_pos += 1
+            row_pos += 1
 
-            # Items (combine names and quantities for display)
-            items_str = ", ".join([f"{item['name']} x{item['quantity']}" for item in receipt["items"]])
-            items_label = ctk.CTkLabel(self.receipt_frame, text=items_str, font=self.body_font)
-            items_label.grid(row=row, column=2, sticky="w")
+        self.delete_button = ctk.CTkButton(self, text="Delete Selected", width=100, height=35, 
+                                        corner_radius=10,
+                                        font=self.body_font, command=self.delete_selected_receipts)
+        self.delete_button.grid(row=9, column=1)
 
-            price_label = ctk.CTkLabel(self.receipt_frame, text=f"${receipt['total']:.2f}", font=self.body_font)
-            price_label.grid(row=row, column=3, sticky="w")
 
-            total_label = ctk.CTkLabel(self.receipt_frame, text=f"${receipt['total']:.2f}", font=self.body_font)
-            total_label.grid(row=row, column=4, sticky="w")
+    def delete_selected_receipts(self):
+        receipts_file = os.path.join(self.BASE_DIR, "receipts.json")
+        try:
+            with open(receipts_file, "r") as f:
+                all_receipts = json.load(f)
+        except Exception:
+            all_receipts = []
 
-            row += 1
-        
+        # Keep only receipts that are NOT checked
+        all_receipts = [r for i, r in enumerate(all_receipts) if not self.receipt_checkbox_vars[i].get()]
+
+        with open(receipts_file, "w") as f:
+            json.dump(all_receipts, f, indent=4)
+
+        self.display_receipts()
+
     def calculate_total(self):
         global total
         total = 0.00
@@ -235,9 +280,12 @@ class App(ctk.CTk):
             self.quantity_vars[args[2]].set("")
         elif args[0] == "names empty":
             mbox.showerror("Input Error", "Please enter both first and last names.")
-        elif args[0] == "name type":
+        elif args[0] == "name type" and args[1] == "first name":
             mbox.showerror("Input Error", f"Please enter a valid input for {args[1]}.")
-            self.name_var.set("")
+            self.first_name_var.set("")
+        elif args[0] == "name type" and args[1] == "last name":
+            mbox.showerror("Input Error", f"Please enter a valid input for {args[1]}.")
+            self.last_name_var.set("")
 
 
 
@@ -265,11 +313,13 @@ class App(ctk.CTk):
 
                 
 
-    def check_name(self, var):
+    def check_name(self, var, first_last):
         value = var.get()
-        filtered = ''.join(ch for ch in value if ch.isalpha())
-        if filtered != value:
-            var.set(filtered)
+        if not value.isalpha() and value != "":
+            if first_last == "last":
+                self.error_message("name type", "last name")
+            if first_last == "first":
+                self.error_message("name type", "first name")
 
     def submit(self):
         if self.first_name_var.get() == "" or self.last_name_var.get() == "":
@@ -316,6 +366,7 @@ class App(ctk.CTk):
             json.dump(all_receipts, f, indent=4)
 
         mbox.showinfo("Saved", f"Receipt #{receipt_no} saved.")
+        self.display_receipts()
 
 
 
